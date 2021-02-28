@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EventHandler.cs" />
     <Compile Include="UICMD.cs" />
     <Compile Include="Hashit.cs" />
     <Compile Include="Program.cs" />

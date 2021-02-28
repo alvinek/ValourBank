@@ -11,11 +11,23 @@ namespace ConsoleApp1
     class Program
     {
         private static string recieved_data { set; get; }
+        public static string login { set; get;}
+        public static string password { set; get;}
         static async Task Main(string[] args)
         {
-            string login = "ACURASA", password = "123";
-            password = Crypto.HashIt.Encrypt(password);
-            Console.WriteLine(password);
+            while (true)
+            {
+                await UICMD.UICMD.InitializeConsoleProps();
+                password = Crypto.HashIt.Encrypt(password);
+                if (ValourBankApi.EventHandler.IsAccountExists(login, password))
+                    break;
+                Console.WriteLine("\n Access denied, try again...");
+                await UICMD.UICMD.InitializeConsoleProps();
+              
+            }
+            await UICMD.UICMD.InitializedMenu();
+
+            //  Console.WriteLine(password);
             try
             {
                 await RequestAsync(login, password);
