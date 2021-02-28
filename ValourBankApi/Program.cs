@@ -10,6 +10,9 @@ namespace ValourBankApi
     {
         static void Main(string[] args)
         {
+            ServerConfiguration serverConfiguration = new ServerConfiguration();
+            SimpleServer simpleServer = new SimpleServer(serverConfiguration.serverUri);
+            simpleServer.ServerListenerStart();
         }
     }
 }
