@@ -1,60 +1,57 @@
 ﻿using System;
-using System.Net;
-using System.IO;
+
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 using System.Text;
 using Crypto;
-namespace ConsoleApp1
+namespace ValourBankApi
 {
 
     class Program
     {
-        private static string recieved_data { set; get; }
-        public static string login { set; get;}
-        public static string password { set; get;}
+        public static string recieved_data;
+        public static string login;
+        public static string password;
+        private static uint op_Id = 0;
+        public static string Account
+        {
+            set 
+            {
+                op_Id++;
+                Console.WriteLine("AccountState has been changed, operation ID is - " + op_Id  ); 
+            }
+            get
+            { return Account; }
+
+        }
         static async Task Main(string[] args)
         {
             while (true)
             {
                 await UICMD.UICMD.InitializeConsoleProps();
+                //Hashowanie md5
                 password = Crypto.HashIt.Encrypt(password);
-                if (ValourBankApi.EventHandler.IsAccountExists(login, password))
+                //Connect Attempt
+                try
+                {
+                    await ValourBankApi.EventHandler.RequestAsync(login, password);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+                //Verifying Account
+                if (ValourBankApi.EventHandler.IsAccountExists(recieved_data)) 
                     break;
                 Console.WriteLine("\n Access denied, try again...");
                 await UICMD.UICMD.InitializeConsoleProps();
-              
             }
             await UICMD.UICMD.InitializedMenu();
-
-            //  Console.WriteLine(password);
-            try
-            {
-                await RequestAsync(login, password);
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
-            Console.ReadLine();
         }
 
 
 
-        public static async Task RequestAsync(string login,string password)
-        {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:8080/?login=" + login + ",passwordhash=" + password); request.ContentType = "text/html";
-            HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
-            using (Stream stream = response.GetResponseStream())
-            {
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                  Program.recieved_data  = reader.ReadToEnd();
-                }
-            }
-
-            response.Close();
-        }
+       
     }
     
 }
