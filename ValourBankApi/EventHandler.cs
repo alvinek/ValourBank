@@ -11,7 +11,7 @@ namespace ValourBankApi
     {
         public static bool IsAccountExists(string confirmation)
         {
-            if (confirmation!="false")
+            if (confirmation=="true")
                 return true;
             else
                 return false;

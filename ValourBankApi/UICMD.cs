@@ -10,7 +10,7 @@ namespace UICMD
 {
     static class UICMD
     {
-        public static async Task InitializeConsoleProps()
+        public static void  InitializeConsoleProps()
         {
             Console.ForegroundColor = ConsoleColor.Black;
             Console.BackgroundColor = ConsoleColor.Red;
@@ -21,7 +21,7 @@ namespace UICMD
             Console.WriteLine("Now, Enter your password");
             Program.password = Console.ReadLine();
         }
-        public static async Task InitializedMenu()
+        public static void InitializedMenu()
         {
             Console.BackgroundColor = ConsoleColor.Cyan;
             Console.Clear();

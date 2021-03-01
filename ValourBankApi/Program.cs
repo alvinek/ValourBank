@@ -28,7 +28,7 @@ namespace ValourBankApi
         {
             while (true)
             {
-                await UICMD.UICMD.InitializeConsoleProps();
+                UICMD.UICMD.InitializeConsoleProps();
                 //Hashowanie md5
                 password = Crypto.HashIt.Encrypt(password);
                 //Connect Attempt
@@ -44,9 +44,10 @@ namespace ValourBankApi
                 if (ValourBankApi.EventHandler.IsAccountExists(recieved_data)) 
                     break;
                 Console.WriteLine("\n Access denied, try again...");
-                await UICMD.UICMD.InitializeConsoleProps();
+                UICMD.UICMD.InitializeConsoleProps();
             }
-            await UICMD.UICMD.InitializedMenu();
+            UICMD.UICMD.InitializedMenu();
+            Console.ReadKey();
         }
 
 
