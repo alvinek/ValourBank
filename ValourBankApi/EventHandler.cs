@@ -18,7 +18,7 @@ namespace ValourBankApi
         }
         public static async Task RequestAsync(string login, string password)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:8080/?login=" + login + ",passwordhash=" + password); request.ContentType = "text/html";
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:8080/?login=" + login + "&passwordhash=" + password); request.ContentType = "text/html";
             HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
             using (Stream stream = response.GetResponseStream())
             {
