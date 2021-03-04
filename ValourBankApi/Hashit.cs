@@ -17,7 +17,7 @@ namespace Crypto
                     tdes.Key = md5.ComputeHash(UTF8Encoding.UTF8.GetBytes(key));
                     tdes.Mode = CipherMode.ECB;
                     tdes.Padding = PaddingMode.PKCS7;
-                   
+
                     using (var transform = tdes.CreateEncryptor())
                     {
                         byte[] textBytes = UTF8Encoding.UTF8.GetBytes(password);

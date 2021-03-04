@@ -12,48 +12,41 @@ namespace ValourBankApi
         public static string recieved_data;
         public static string login;
         public static string password;
-        private static uint op_Id = 0;
-        public static string Account
-        {
-            set 
-            {
-                op_Id++;
-                Console.WriteLine("AccountState has been changed, operation ID is - " + op_Id  ); 
-            }
-            get
-            { return Account; }
+        public static int AccountState;
 
-        }
         static async Task Main(string[] args)
         {
+            //ValourBankApi.SImpleObsfucator.PtrCreate();
+            UICMD.UICMD.InitializeConsoleProps();
             while (true)
             {
-                UICMD.UICMD.InitializeConsoleProps();
+
                 //Hashowanie md5
                 password = Crypto.HashIt.Encrypt(password);
                 //Connect Attempt
                 try
                 {
-                    await ValourBankApi.EventHandler.RequestAsync(login, password);
+                    await Task.Run(() => ValourBankApi.EventHandler.RequestAsync(login, password));
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.ToString());
                 }
                 //Verifying Account
-                if (ValourBankApi.EventHandler.IsAccountExists(recieved_data)) 
+                if (ValourBankApi.EventHandler.IsAccountExists(recieved_data))
                     break;
                 Console.WriteLine("\n Access denied, try again...");
                 UICMD.UICMD.InitializeConsoleProps();
             }
-            UICMD.UICMD.InitializedMenu();
+            await Task.Run(() => UICMD.UICMD.InitializedMenu());
+
             Console.ReadKey();
         }
 
 
 
-       
+
     }
-    
+
 }
 
