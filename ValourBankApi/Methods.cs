@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,10 +9,16 @@ namespace ValourBankApi
 {
     static class Methods
     {
-        internal static void Shutdown()
+        private static int count = 0;
+
+        internal static string Shutdown()
         {
-            Console.WriteLine("Shutdown requested");
+            return "Shutdown requested";
         }
 
+        internal static int Counter()
+        {
+            return count++;
+        }
     }
 }

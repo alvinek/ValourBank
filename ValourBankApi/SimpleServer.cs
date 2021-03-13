@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace ValourBankApi
 {
@@ -27,7 +29,7 @@ namespace ValourBankApi
                 var context = await Listener.GetContextAsync();
 
                 var request = context.Request;
-                var response = context.Response;
+                var strResponse = string.Empty;
 
                 Console.WriteLine("Request: " + request.Url);
                 Console.WriteLine("Method: " + request.HttpMethod);
@@ -36,17 +38,34 @@ namespace ValourBankApi
 
                 if (request.HttpMethod == "GET" && request.Url.AbsolutePath.StartsWith("/shutdown"))
                 {
-                    Methods.Shutdown();
+                    strResponse = Methods.Shutdown();
                     serverRunning = false;
                 }
 
-                var data = Encoding.UTF8.GetBytes("Hello world.");
-                response.ContentType = "text/html";
-                response.ContentEncoding = Encoding.UTF8;
-                response.ContentLength64 = data.LongLength;
+                if (request.HttpMethod == "GET" && request.Url.AbsolutePath.StartsWith("/login"))
+                {
+                    
+                    if (request.QueryString.HasKeys())
+                    {
+                        var passw = request.ContentEncoding.GetBytes(request.QueryString["passw"]);
+                        var user = request.ContentEncoding.GetBytes(request.QueryString["user"]);
+                        var passwUtf8 = Encoding.Convert(request.ContentEncoding, Encoding.UTF8, passw);
+                        var userUtf8 = Encoding.Convert(request.ContentEncoding, Encoding.UTF8, user);
+                         
 
-                await response.OutputStream.WriteAsync(data, 0, data.Length);
-                response.Close();
+                        strResponse =
+                            $"{Encoding.UTF8.GetString(passwUtf8)} {Encoding.UTF8.GetString(userUtf8)}";
+
+                    }
+                }
+
+                var data = Encoding.UTF8.GetBytes(strResponse);
+                context.Response.ContentType = "text/html";
+                context.Response.ContentEncoding = Encoding.UTF8;
+                context.Response.ContentLength64 = data.LongLength;
+
+                await context.Response.OutputStream.WriteAsync(data, 0, data.Length);
+                context.Response.Close();
             }
         }
 
