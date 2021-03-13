@@ -13,5 +13,6 @@ namespace ValourBankApi.Includes
         public static string password;
         public static double accountState;
         public static string hashedPass;
+        public static string guid;
     }
 }

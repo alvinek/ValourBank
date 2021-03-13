@@ -28,7 +28,11 @@ namespace ValourBankApi
                 }
                 //Verifying Account
                 if (ValourBankApi.EventHandler.IsAccountExists(ValourBankApi.Includes.dlc.recieved_data))
+                {
+                    
                     break;
+                }
+
                 Console.WriteLine("\n Access denied, try again...");
                 UICMD.UICMD.InitializeConsoleProps();
             }

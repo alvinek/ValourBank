@@ -49,7 +49,6 @@
     <Compile Include="Core\SImpleObsfucator.cs" />
     <Compile Include="Core\UICMD.cs" />
     <Compile Include="Includes\dlc.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

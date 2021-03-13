@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -14,6 +15,7 @@ namespace ValourBankApi
     {
         public HttpListener Listener;
         public Uri Uri;
+        public SimpleDb simpleDb;
 
         internal SimpleServer(Uri uri)
         {
@@ -47,15 +49,32 @@ namespace ValourBankApi
                     
                     if (request.QueryString.HasKeys())
                     {
-                        var passw = request.ContentEncoding.GetBytes(request.QueryString["passw"]);
-                        var user = request.ContentEncoding.GetBytes(request.QueryString["user"]);
-                        var passwUtf8 = Encoding.Convert(request.ContentEncoding, Encoding.UTF8, passw);
-                        var userUtf8 = Encoding.Convert(request.ContentEncoding, Encoding.UTF8, user);
-                         
+                        var passw = request.QueryString["login"];
+                        var user = request.QueryString["pass"];
 
-                        strResponse =
-                            $"{Encoding.UTF8.GetString(passwUtf8)} {Encoding.UTF8.GetString(userUtf8)}";
+                        strResponse = simpleDb.LoginCheck(user, passw);
+                    }
+                }
 
+                if (request.HttpMethod == "GET" && request.Url.AbsolutePath.StartsWith("/accdata"))
+                {
+                    if (request.QueryString.HasKeys())
+                    {
+                        var guid = request.QueryString["guid"];
+                        strResponse = simpleDb.GetAccountState(guid);
+                    }
+                }
+
+                if (request.HttpMethod == "GET" && request.Url.AbsolutePath.StartsWith("/accstate"))
+                {
+                    if (request.QueryString.HasKeys())
+                    {
+                        var guid = request.QueryString["guid"];
+                        var state = request.QueryString["state"];
+
+                        decimal.TryParse(state, NumberStyles.Float, CultureInfo.InvariantCulture, out var result);
+
+                        strResponse = simpleDb.UpdateAccountState(guid, result);
                     }
                 }
 
@@ -72,14 +91,19 @@ namespace ValourBankApi
 
         internal void ServerListenerStart()
         {
-            Listener = new HttpListener();
-            Listener.Prefixes.Add(Uri.ToString());
-            Listener.Start();
-
+            Prepare();
             Console.WriteLine("Server started on " + Uri);
             var task = HandleConnection();
             task.GetAwaiter().GetResult();
             Listener.Close();
+        }
+
+        private void Prepare()
+        {
+            Listener = new HttpListener();
+            Listener.Prefixes.Add(Uri.ToString());
+            Listener.Start();
+            simpleDb = new SimpleDb();
         }
     }
 }
