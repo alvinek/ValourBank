@@ -45,11 +45,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EventHandler.cs" />
-    <Compile Include="SImpleObsfucator.cs" />
-    <Compile Include="UICMD.cs" />
-    <Compile Include="Hashit.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Core\EventHandler.cs" />
+    <Compile Include="Core\SImpleObsfucator.cs" />
+    <Compile Include="Core\UICMD.cs" />
+    <Compile Include="Core\Hashit.cs" />
+    <Compile Include="Core\Program.cs" />
+    <Compile Include="Includes\dlc.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

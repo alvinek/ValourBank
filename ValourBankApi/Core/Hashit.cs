@@ -6,7 +6,7 @@ namespace Crypto
 {
     static class HashIt
     {
-        static string key { get; set; } = "A!9HHhi%XjjYY4YP2@Nob009X";
+        static string Key { get; set; } = "A!9HHhi%XjjYY4YP2@Nob009X";
 
         public static string Encrypt(string password)
         {
@@ -14,7 +14,7 @@ namespace Crypto
             {
                 using (var tdes = new TripleDESCryptoServiceProvider())
                 {
-                    tdes.Key = md5.ComputeHash(UTF8Encoding.UTF8.GetBytes(key));
+                    tdes.Key = md5.ComputeHash(UTF8Encoding.UTF8.GetBytes(Key));
                     tdes.Mode = CipherMode.ECB;
                     tdes.Padding = PaddingMode.PKCS7;
 
@@ -34,7 +34,7 @@ namespace Crypto
             {
                 using (var tdes = new TripleDESCryptoServiceProvider())
                 {
-                    tdes.Key = md5.ComputeHash(UTF8Encoding.UTF8.GetBytes(key));
+                    tdes.Key = md5.ComputeHash(UTF8Encoding.UTF8.GetBytes(Key));
                     tdes.Mode = CipherMode.ECB;
                     tdes.Padding = PaddingMode.PKCS7;
                     using (var transform = tdes.CreateDecryptor())

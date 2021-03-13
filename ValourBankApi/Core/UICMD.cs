@@ -17,9 +17,9 @@ namespace UICMD
             Printlogo(); Thread.Sleep(500); Printlogo(); Thread.Sleep(500);
             Console.WriteLine("Switala & Stasyuk Bank"); Thread.Sleep(500);
             Console.WriteLine("Please, Log in... \n Enter your client ID");
-            Program.login = Console.ReadLine();
+            ValourBankApi.Includes.dlc.login = Console.ReadLine();
             Console.WriteLine("Now, Enter your password");
-            Program.password = Console.ReadLine();
+            ValourBankApi.Includes.dlc.password = Console.ReadLine();
         }
         public static async Task InitializedMenu()
         {
@@ -30,7 +30,7 @@ namespace UICMD
                 Console.WriteLine("Successful login, welcome back");
                 await Task.Run(() => ValourBankApi.EventHandler.GetAccountState()); Thread.Sleep(1000);
             Badref:
-                Console.WriteLine("Your Current deposit is... " + Program.AccountState);
+                Console.WriteLine("Your Current deposit is... " + ValourBankApi.Includes.dlc.accountState);
                 Console.WriteLine("1:\t Withdraw ");
                 Console.WriteLine("2:\t Deposit ");
                 Console.WriteLine("Q: Quit Application ");
@@ -42,20 +42,22 @@ namespace UICMD
                 }
                 if (Int32.TryParse(option, out result))
                 {
-                    int localResult;
+                    Double localResult;
                     if (result == 1 || result == 2)
                     {
                         Console.WriteLine("How much you want to withdraw | deposit? ...\t"); option = Console.ReadLine();
-                        if (Int32.TryParse(option, out localResult))
+                        Console.WriteLine("Max Withdraw is 100 000");
+                        Console.WriteLine("Max deposit is 100 000");
+                        if (Double.TryParse(option, out localResult))
                         {
-                            if (localResult <= Program.AccountState && localResult >= 0 && result == 1)
+                            if (localResult <= ValourBankApi.Includes.dlc.accountState && localResult >= 0 && result == 1)
                             {
-                                Program.AccountState -= localResult;
+                                ValourBankApi.Includes.dlc.accountState -= localResult;
                                 await ValourBankApi.EventHandler.SetAccountState();
                             }
-                            else if (localResult >= 0 && result == 2)
+                            else if (localResult >= 0 && result == 2 && localResult <= 100000)
                             {
-                                Program.AccountState += localResult;
+                                ValourBankApi.Includes.dlc.accountState += localResult;
                                 await ValourBankApi.EventHandler.SetAccountState();
                             }
                             else
@@ -80,14 +82,14 @@ namespace UICMD
         {
             Console.WriteLine("W *****************\n" +
                               "E *****************\n" +
-                              "L ***           ***\n" +
-                              "C ***              \n" +
+                              "L ***          ****\n" +
+                              "C ***          ****\n" +
                               "O ***              \n" +
-                              "M *****************\n" +
+                              "M ****************♥\n" +
                               "E *****************\n" +
                               "T               ***\n" +
-                              "O               ***\n" +
-                              "S ***           ***\n" +
+                              "O ****          ***\n" +
+                              "S ****          ***\n" +
                               "S *****************\n" +
                               "B *****************\n");
         }

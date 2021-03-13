@@ -9,6 +9,7 @@ namespace ValourBankApi
 {
     class EventHandler
     {
+        public static string separator = "&";
         public static bool IsAccountExists(string confirmation)
         {
             if (confirmation == "true")
@@ -18,13 +19,15 @@ namespace ValourBankApi
         }
         public static async Task RequestAsync(string login, string password)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:8080/?login=" + login + "&passwordhash=" + password); request.ContentType = "text/html";
+            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:8080/?login=" + login + "&passwordhash=" + password); 
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:8080/?" + login + separator + password);
+            request.ContentType = "text/html"; request.UserAgent = "SSB";
             HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
             using (Stream stream = response.GetResponseStream())
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    Program.recieved_data = reader.ReadToEnd();
+                    ValourBankApi.Includes.dlc.recieved_data = reader.ReadToEnd();
                 }
             }
             response.Close();
@@ -33,26 +36,28 @@ namespace ValourBankApi
         public static async Task GetAccountState()
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:8080/?AccData");
+            request.ContentType = "text/html"; request.UserAgent = "SSB";
             HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
             using (Stream stream = response.GetResponseStream())
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    Program.recieved_data = reader.ReadToEnd();
+                    ValourBankApi.Includes.dlc.recieved_data = reader.ReadToEnd();
                 }
-                Int32.TryParse(Program.recieved_data, out Program.AccountState);
+                Double.TryParse(ValourBankApi.Includes.dlc.recieved_data, out ValourBankApi.Includes.dlc.accountState);
             }
             response.Close();
         }
         public static async Task SetAccountState()
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:8080/?AccData");
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:8080/?Update");
+            request.ContentType = "text/html"; request.UserAgent = "SSB";
             HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
             using (Stream stream = response.GetResponseStream())
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    Program.recieved_data = reader.ReadToEnd();
+                    ValourBankApi.Includes.dlc.recieved_data = reader.ReadToEnd();
                     
                 }
             }
@@ -61,12 +66,13 @@ namespace ValourBankApi
         public static async Task CloseConnectionAsync()
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:8080/shutdown");
+            request.ContentType = "text/html"; request.UserAgent = "SSB";
             HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
             using (Stream stream = response.GetResponseStream())
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    Program.recieved_data = reader.ReadToEnd();
+                    ValourBankApi.Includes.dlc.recieved_data = reader.ReadToEnd();
                 }
             }
             response.Close();
