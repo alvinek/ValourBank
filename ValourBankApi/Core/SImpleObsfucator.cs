@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 namespace ValourBankApi
 {
-    class Program
+    class SImpleObsfucator
     {
-        static void Main(string[] args)
+
+        unsafe public static void PtrCreate(uint notptr = 32)
         {
+            uint* ptr = (uint*)notptr;
+            Console.WriteLine((uint)&notptr);
             var test = new List<string> {"test1", "test2", "test3"};
             foreach(var r in test)
                 Console.WriteLine(r);
