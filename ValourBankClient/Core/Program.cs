@@ -9,8 +9,10 @@ namespace ValourBankApi
 
     class Program
     {
-        static async Task Main(string[] args)
+        public static async Task Main(string[] args)
         {
+            while (true) 
+                { 
             UICMD.UICMD.InitializeConsoleProps();
             while (true)
             {
@@ -29,7 +31,7 @@ namespace ValourBankApi
                 //Verifying Account
                 if (ValourBankApi.EventHandler.IsAccountExists(ValourBankApi.Includes.dlc.recieved_data))
                 {
-                    
+
                     break;
                 }
 
@@ -37,6 +39,7 @@ namespace ValourBankApi
                 UICMD.UICMD.InitializeConsoleProps();
             }
             await Task.Run(() => UICMD.UICMD.InitializedMenu());
+                }
         }
     }
 

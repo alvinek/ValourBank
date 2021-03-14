@@ -54,8 +54,9 @@ namespace ValourBankApi
 
                         strResponse = simpleDb.LoginCheck(user, passw);
                     }
+                    
                 }
-
+               
                 if (request.HttpMethod == "GET" && request.Url.AbsolutePath.StartsWith("/accdata"))
                 {
                     if (request.QueryString.HasKeys())

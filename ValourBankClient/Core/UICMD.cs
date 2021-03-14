@@ -54,11 +54,18 @@ namespace UICMD
                             {
                                 ValourBankApi.Includes.dlc.accountState -= localResult;
                                 await ValourBankApi.EventHandler.SetAccountState();
+                                Console.WriteLine(ValourBankApi.Includes.dlc.recieved_data);
                             }
                             else if (localResult >= 0 && result == 2 && localResult <= 100000)
                             {
                                 ValourBankApi.Includes.dlc.accountState += localResult;
                                 await ValourBankApi.EventHandler.SetAccountState();
+                                Console.WriteLine(ValourBankApi.Includes.dlc.recieved_data);
+                            }
+                            else if(localResult >= 0 && result == 3 && localResult <= 100000)
+                            {
+                                await ValourBankApi.EventHandler.TrasnferRequest(localResult.ToString());
+                                Console.WriteLine(ValourBankApi.Includes.dlc.recieved_data);
                             }
                             else
                             {
@@ -77,6 +84,7 @@ namespace UICMD
                     Console.WriteLine("Invalid Operation, Try Again\t"); goto Badref;
                 }
             }
+            
         }
         private static void Printlogo()
         {

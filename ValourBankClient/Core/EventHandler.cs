@@ -17,7 +17,7 @@ namespace ValourBankApi
             if (confirmation.StartsWith("false"))
                 return false;
             var split = confirmation.Split(';');
-            Includes.dlc.guid = split[1];
+            Includes.dlc.guid = split[1]; // INDEX OUT OF RANGE EXCEPTION
             return true;
         }
         public static async Task RequestAsync(string login, string password)
@@ -84,6 +84,20 @@ namespace ValourBankApi
         public static async Task CloseConnectionAsync()
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:8080/shutdown");
+            request.ContentType = "text/html"; request.UserAgent = "SSB";
+            HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
+            using (Stream stream = response.GetResponseStream())
+            {
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    ValourBankApi.Includes.dlc.recieved_data = reader.ReadToEnd();
+                }
+            }
+            response.Close();
+        }
+        public static async Task TrasnferRequest(string value)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:8080/trasferrequest?value="+value);
             request.ContentType = "text/html"; request.UserAgent = "SSB";
             HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
             using (Stream stream = response.GetResponseStream())
