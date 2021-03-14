@@ -27,7 +27,7 @@ namespace UICMD
             {
                 Console.BackgroundColor = ConsoleColor.Cyan;
                 Console.Clear();
-                Console.WriteLine("Successful login, welcome back");
+                Console.WriteLine("Successful login, welcome back " + ValourBankApi.Includes.dlc.login);
                 await Task.Run(() => ValourBankApi.EventHandler.GetAccountState()); Thread.Sleep(1000);
             Badref:
                 Console.WriteLine("Your Current deposit is... " + ValourBankApi.Includes.dlc.accountState);
@@ -37,7 +37,7 @@ namespace UICMD
                 string option = Console.ReadLine(); int result;
                 if (option == "Q" || option == "q")
                 {
-                    //await ValourBankApi.EventHandler.CloseConnectionAsync();
+                    await ValourBankApi.EventHandler.LogoutAccount();
                     break;
                 }
                 if (Int32.TryParse(option, out result))

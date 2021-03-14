@@ -78,6 +78,16 @@ namespace ValourBankApi
                     }
                 }
 
+                if (request.HttpMethod == "GET" && request.Url.AbsolutePath.StartsWith("/logout"))
+                {
+                    if(request.QueryString.HasKeys())
+                    {
+                        var guid = request.QueryString["guid"];
+
+                        simpleDb.DestroySession(guid);
+                    }
+                }
+
                 var data = Encoding.UTF8.GetBytes(strResponse);
                 context.Response.ContentType = "text/html";
                 context.Response.ContentEncoding = Encoding.UTF8;

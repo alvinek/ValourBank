@@ -8,9 +8,9 @@ namespace ValourBankApi
 {
     class User
     {
-        internal string Username { get; set; }
-        internal string Password { get; set; }
-        internal decimal AccountState { get; set; }
-        internal string Guid { get; set; }
+        internal string Username { get; set; } = string.Empty;
+        internal string Password { get; set; } = string.Empty;
+        internal decimal AccountState { get; set; } = 0;
+        internal string Guid { get; set; } = string.Empty;
     }
 }

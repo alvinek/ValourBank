@@ -66,6 +66,21 @@ namespace ValourBankApi
             }
             response.Close();
         }
+
+        public static async Task LogoutAccount()
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:8080/logout?guid=" + Includes.dlc.guid);
+            request.ContentType = "text/html"; request.UserAgent = "SSB";
+            HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
+            using (Stream stream = response.GetResponseStream())
+            {
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    ValourBankApi.Includes.dlc.recieved_data = reader.ReadToEnd();
+                }
+            }
+            response.Close();
+        }
         public static async Task CloseConnectionAsync()
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:8080/shutdown");

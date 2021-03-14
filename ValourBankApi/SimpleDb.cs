@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ValourBankApi
@@ -27,6 +28,11 @@ namespace ValourBankApi
                 var decryptedLine = SimpleDbHash.Decrypt(lineEncrypted);
 
                 var splittedLine = decryptedLine.Split(',');
+
+                if (_users.Any(x => x.Username.Equals(splittedLine[0])))
+                {
+                    Console.WriteLine("Account already exists for this usr: " + splittedLine[0]);
+                }
 
                 if (decimal.TryParse(splittedLine[2], NumberStyles.Float, CultureInfo.InvariantCulture, out var accountState))
                 {
@@ -52,6 +58,14 @@ namespace ValourBankApi
             return "false";
         }
 
+        internal void DestroySession(string guid)
+        {
+            if (_users.Any(x => x.Guid.Equals(guid)))
+            {
+                _users.First(x => x.Guid.Equals(guid)).Guid = string.Empty;
+            }
+        }
+
         internal string GetAccountState(string guid)
         {
             if (_users.Any(x => x.Guid.Equals(guid)))
@@ -67,12 +81,24 @@ namespace ValourBankApi
                 user => user.Username.Equals(login) && user.Password.Equals(password)
                 ))
             {
-                var guid = Guid.NewGuid();
+                if (_users.Count(user => user.Username.Equals(login) && user.Password.Equals(password)) > 1)
+                {
+                    throw new Exception("More than one user has same login and password");
+                }
 
-                _users.First(user => user.Username.Equals(login) && user.Password.Equals(password))
-                    .Guid = guid.ToString();
+                if (string.IsNullOrEmpty(_users.First(user =>
+                    user.Username.Equals(login) && user.Password.Equals(password)).Guid))
+                {
+                    var guid = Guid.NewGuid();
 
-                return "true;" + guid;
+                    _users.First(user => user.Username.Equals(login) && user.Password.Equals(password))
+                        .Guid = guid.ToString();
+
+                    return "true;" + guid;
+                }
+                // ktos jest juz zalogowany
+                return "false";
+                
             }
             else
             {
@@ -93,22 +119,19 @@ namespace ValourBankApi
 
         internal void DummyUsersCreator()
         {
-            var usr = new User()
-            {
-                AccountState = 50,
-                Password = "strongpass",
-                Username = "testuser"
-            };
+            // robimy 1000 uzytkownikow
 
-            _users.Add(usr);
-
-            var usr2 = new User()
+            for(int i = 0; i < 1000; i++)
             {
-                AccountState = (decimal) 50.5,
-                Password = "2334445555",
-                Username = "testuser2"
-            };
-            _users.Add(usr2);
+                var usr = new User()
+                {
+                    AccountState = new Random().Next(1, 99999),
+                    Password = "dummy" + i,
+                    Username = "dummypass" + i
+                };
+                _users.Add(usr);
+                Thread.Sleep(5);
+            }
 
             Flush();
         }
