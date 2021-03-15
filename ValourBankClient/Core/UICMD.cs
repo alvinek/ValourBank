@@ -62,9 +62,11 @@ namespace UICMD
                                 await ValourBankApi.EventHandler.SetAccountState();
                                 Console.WriteLine(ValourBankApi.Includes.dlc.recieved_data);
                             }
-                            else if(localResult >= 0 && result == 3 && localResult <= 100000)
+                            else if (localResult >= 0 && result == 3 && localResult <= Double.Parse(ValourBankApi.Includes.dlc.recieved_data))
                             {
-                                await ValourBankApi.EventHandler.TrasnferRequest(localResult.ToString());
+                                Console.WriteLine("Enter account ID, to transfer to");
+                                string transfTo = Console.ReadLine();
+                                await ValourBankApi.EventHandler.TrasnferRequest(localResult.ToString(),transfTo);
                                 Console.WriteLine(ValourBankApi.Includes.dlc.recieved_data);
                             }
                             else
