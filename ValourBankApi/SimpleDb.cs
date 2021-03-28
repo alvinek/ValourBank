@@ -16,6 +16,7 @@ namespace ValourBankApi
         private string dbPath = Path.Combine(Environment.CurrentDirectory, "db.bin");
         private bool changed = false;
         private bool Lock = false;
+        private Timer timer = null;
 
         internal SimpleDb()
         {
@@ -48,6 +49,8 @@ namespace ValourBankApi
                     });
                 }
             }
+            
+            timer = new Timer((x) => Flush(), null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
         }
 
         internal string UpdateAccountState(string guid, decimal accountState)
@@ -61,6 +64,31 @@ namespace ValourBankApi
             }
 
             return "false";
+        }
+
+        internal string TransferMoney(string guid, string to, decimal howMuch)
+        {
+            WhileLock();
+
+            if (_users.Any(x => x.Guid.Equals(guid)))
+            {
+                var userFrom = _users.First(x => x.Guid.Equals(guid));
+
+                if (userFrom.AccountState > howMuch)
+                {
+                    var userTo = _users.FirstOrDefault(x => x.Username.Equals(to));
+                    if (userTo != null)
+                    {
+                        userTo.AccountState += howMuch;
+                        userFrom.AccountState -= howMuch;
+                        changed = true;
+                        return "true";
+                    }
+                }
+            }
+
+            return "false";
+
         }
 
         internal void DestroySession(string guid)
@@ -108,12 +136,16 @@ namespace ValourBankApi
 
         internal void Flush()
         {
-            if (!changed) return;
+            if (!changed)
+            {
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Flush has nothing to do");
+                return;
+            }
             if (Lock) return;
 
             changed = false;
             Lock = true;
-            Console.WriteLine("Flush started");
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Flush started");
             List<string> db = _users
                 .Select(user =>
                 {
@@ -125,7 +157,7 @@ namespace ValourBankApi
 
             File.WriteAllLines(dbPath, db);
             Lock = false;
-            Console.WriteLine("Flush finished");
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Flush finished");
         }
 
         internal void DummyUsersCreator()

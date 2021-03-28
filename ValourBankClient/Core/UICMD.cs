@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,6 +34,7 @@ namespace UICMD
                 Console.WriteLine("Your Current deposit is... " + ValourBankApi.Includes.dlc.accountState);
                 Console.WriteLine("1:\t Withdraw ");
                 Console.WriteLine("2:\t Deposit ");
+                Console.WriteLine("3:\t Transfer ");
                 Console.WriteLine("Q: Quit Application ");
                 string option = Console.ReadLine(); int result;
                 if (option == "Q" || option == "q")
@@ -45,9 +47,10 @@ namespace UICMD
                     Double localResult;
                     if (result == 1 || result == 2)
                     {
-                        Console.WriteLine("How much you want to withdraw | deposit? ...\t"); option = Console.ReadLine();
+                        Console.WriteLine("How much you want to withdraw | deposit? ...\t");
                         Console.WriteLine("Max Withdraw is 100 000");
                         Console.WriteLine("Max deposit is 100 000");
+                        option = Console.ReadLine();
                         if (Double.TryParse(option, out localResult))
                         {
                             if (localResult <= ValourBankApi.Includes.dlc.accountState && localResult >= 0 && result == 1)
@@ -68,6 +71,29 @@ namespace UICMD
                         else
                         {
                             Console.WriteLine("Invalid Operation, Try Again\t"); goto Badref;
+                        }
+                    }
+
+                    if (result == 3)
+                    {
+                        Console.WriteLine("How much do you want to transfer and to who?");
+                        Console.Write("How much: ");
+                        var howMuch = Console.ReadLine();
+                        Console.WriteLine();
+                        Console.Write("To who: ");
+                        var toWho = Console.ReadLine();
+
+                        if (double.TryParse(howMuch, NumberStyles.Float, CultureInfo.InvariantCulture,
+                            out double decimalHowMuch))
+                        {
+                            if (ValourBankApi.Includes.dlc.accountState < decimalHowMuch)
+                            {
+                                Console.WriteLine("You dont have money");
+                                Console.ReadLine();
+                                goto Badref;
+                            }
+
+                            await ValourBankApi.EventHandler.TransferMoney(toWho, decimalHowMuch);
                         }
                     }
 

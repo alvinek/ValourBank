@@ -30,10 +30,7 @@ namespace ValourBankApi
                 var request = context.Request;
                 var strResponse = string.Empty;
 
-                Console.WriteLine("Request: " + request.Url);
-                Console.WriteLine("Method: " + request.HttpMethod);
-                Console.WriteLine("UserHostName: " + request.UserHostName);
-                Console.WriteLine("UserAgent: " + request.UserAgent);
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Request: " + request.Url);
 
                 if (request.HttpMethod == "GET" && request.Url.AbsolutePath.StartsWith("/shutdown"))
                 {
@@ -79,6 +76,23 @@ namespace ValourBankApi
                     }
                 }
 
+                if (request.HttpMethod == "GET" && request.Url.AbsolutePath.StartsWith("/transfer"))
+                {
+                    if (request.QueryString.HasKeys())
+                    {
+                        var guid = request.QueryString["guid"];
+                        var destinationAccount = request.QueryString["dest"];
+                        var howMuch = request.QueryString["much"];
+
+                        decimal.TryParse(howMuch, NumberStyles.Float, CultureInfo.InvariantCulture, out var decimalHowMuch);
+
+                        strResponse = simpleDb.TransferMoney(guid, destinationAccount, decimalHowMuch);
+
+                        Debug.WriteLine($"{request.Url} => {strResponse}");
+                    }
+                }
+
+
                 if (request.HttpMethod == "GET" && request.Url.AbsolutePath.StartsWith("/logout"))
                 {
                     if (request.QueryString.HasKeys())
@@ -106,7 +120,7 @@ namespace ValourBankApi
         {
             Prepare();
             Console.WriteLine("Server started on " + Uri);
-            var timer = new Timer((x) => simpleDb.Flush(), null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
+            
             var task = HandleConnection();
             task.GetAwaiter().GetResult();
             Listener.Close();

@@ -30,7 +30,7 @@ namespace ValourBankApi
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    ValourBankApi.Includes.dlc.recieved_data = reader.ReadToEnd();
+                    ValourBankApi.Includes.dlc.recieved_data = await reader.ReadToEndAsync();
                 }
             }
             response.Close();
@@ -45,7 +45,7 @@ namespace ValourBankApi
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    ValourBankApi.Includes.dlc.recieved_data = reader.ReadToEnd();
+                    ValourBankApi.Includes.dlc.recieved_data = await reader.ReadToEndAsync();
                 }
                 Double.TryParse(ValourBankApi.Includes.dlc.recieved_data, out ValourBankApi.Includes.dlc.accountState);
             }
@@ -61,10 +61,30 @@ namespace ValourBankApi
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    ValourBankApi.Includes.dlc.recieved_data = reader.ReadToEnd();
+                    ValourBankApi.Includes.dlc.recieved_data = await reader.ReadToEndAsync();
                 }
             }
             response.Close();
+        }
+
+        public static async Task TransferMoney(string toWho, double howMuch)
+        {
+            var urlRequested = $"http://localhost:8080/transfer?guid={Includes.dlc.guid}{separator}dest={toWho}{separator}much={howMuch}";
+
+            HttpWebRequest req = (HttpWebRequest) WebRequest.Create(urlRequested);
+
+            req.ContentType = "text/html";
+            req.UserAgent = "SSB";
+
+            HttpWebResponse response = (HttpWebResponse) await req.GetResponseAsync();
+
+            using (Stream stream = response.GetResponseStream())
+            {
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    ValourBankApi.Includes.dlc.recieved_data = await reader.ReadToEndAsync();
+                }
+            }
         }
 
         public static async Task LogoutAccount()
@@ -76,7 +96,7 @@ namespace ValourBankApi
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    ValourBankApi.Includes.dlc.recieved_data = reader.ReadToEnd();
+                    ValourBankApi.Includes.dlc.recieved_data = await reader.ReadToEndAsync();
                 }
             }
             response.Close();
@@ -90,7 +110,7 @@ namespace ValourBankApi
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    ValourBankApi.Includes.dlc.recieved_data = reader.ReadToEnd();
+                    ValourBankApi.Includes.dlc.recieved_data = await reader.ReadToEndAsync();
                 }
             }
             response.Close();

@@ -33,12 +33,74 @@ namespace ValourBankTest
             internal static string AccountData = "http://localhost:8080/accdata?guid={0}";
             internal static string AccountState = "http://localhost:8080/accstate?state={0}&guid={1}";
             internal static string Logout = "http://localhost:8080/logout?guid={0}";
+            internal static string Transfer = "http://localhost:8080/transfer?guid={0}&dest={1}&much={2}";
         }
 
         private List<TestUser> testUsers = new List<TestUser>();
 
         [TestMethod, TestCategory("API")]
-        public void RunApiTest()
+        public void SameUserTest()
+        {
+            var response = new WebClient().DownloadString(string.Format(Urls.Login, "dummy1", "dummypass1"));
+            Assert.IsTrue(response.Contains(";"));
+            var guidStr = response.Split(';')[1];
+            Assert.IsTrue(Guid.TryParse(guidStr, out Guid result));
+            response = new WebClient().DownloadString(string.Format(Urls.Login, "dummy1", "dummypass1"));
+            Assert.AreEqual(response, "false");
+            var logout = new WebClient().DownloadString(string.Format(Urls.Logout, guidStr));
+            Assert.AreEqual(logout, string.Empty);
+        }
+
+        [TestMethod, TestCategory("API")]
+        public void TransferMoneyTest()
+        {
+            var ids = Enumerable.Range(1, 499);
+
+            Parallel.ForEach(ids, (id) =>
+            {
+                var response = new WebClient().DownloadString(string.Format(Urls.Login, $"dummy{id}", $"dummypass{id}"));
+                Assert.IsTrue(response.Contains(";"));
+                var guidStr = response.Split(';')[1];
+                var amountOn1 = new WebClient().DownloadString(string.Format(Urls.AccountData, guidStr));
+                Assert.IsTrue(decimal.TryParse(amountOn1, NumberStyles.Float, CultureInfo.InvariantCulture,
+                    out var decimalAmountOn1));
+
+                response = new WebClient().DownloadString(string.Format(Urls.Login, $"dummy{id+500}", $"dummypass{id+500}"));
+                Assert.IsTrue(response.Contains(';'));
+                var guidStr2 = response.Split(';')[1];
+                var amountOn2 = new WebClient().DownloadString(string.Format(Urls.AccountData, guidStr2));
+
+                Assert.IsTrue(decimal.TryParse(amountOn2, NumberStyles.Float, CultureInfo.InvariantCulture,
+                    out var decimalAmountOn2));
+
+                var transferMoney =
+                    new WebClient().DownloadString(
+                        string.Format(Urls.Transfer, guidStr, $"dummy{id+500}", "100"));
+
+                var afterAmountOn2 = new WebClient().DownloadString(string.Format(Urls.AccountData, guidStr2));
+                Assert.IsTrue(decimal.TryParse(afterAmountOn2, NumberStyles.Float, CultureInfo.InvariantCulture,
+                    out var decimalAfterAmountOn2));
+
+                if (decimalAmountOn1 - 100 < 0)
+                {
+                    Assert.AreEqual("false", transferMoney);
+                    Assert.IsFalse(decimalAfterAmountOn2 - 100 == decimalAmountOn2);
+                }
+                else
+                {
+                    Assert.AreEqual("true", transferMoney);
+                    Assert.IsTrue(decimalAfterAmountOn2 - 100 == decimalAmountOn2);
+                }
+               
+
+                Assert.AreEqual(string.Empty, new WebClient().DownloadString(string.Format(Urls.Logout, guidStr2)));
+                Assert.AreEqual(string.Empty, new WebClient().DownloadString(string.Format(Urls.Logout, guidStr)));
+            }
+            );
+        }
+
+        [TestMethod, TestCategory("API")]
+        public void RunHeavyApiTest()
         {
             GenerateUsers();
             Assert.IsTrue(testUsers.Any());
@@ -86,7 +148,7 @@ namespace ValourBankTest
 
             for (int i = 1; i <= 1000; i++)
             {
-                Debug.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Running phase {i} from 15");
+                Debug.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Running phase {i} from 1000");
                 int whichUser = 0;
                 Parallel.ForEach(testUsers, new ParallelOptions(){MaxDegreeOfParallelism = 8}, (user) =>
                 {
