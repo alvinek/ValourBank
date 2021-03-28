@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -13,6 +14,8 @@ namespace ValourBankApi
     {
         private List<User> _users = new List<User>();
         private string dbPath = Path.Combine(Environment.CurrentDirectory, "db.bin");
+        private bool changed = false;
+        private bool Lock = false;
 
         internal SimpleDb()
         {
@@ -36,6 +39,7 @@ namespace ValourBankApi
 
                 if (decimal.TryParse(splittedLine[2], NumberStyles.Float, CultureInfo.InvariantCulture, out var accountState))
                 {
+                    Debug.WriteLine($"Reading user: {splittedLine[0]}");
                     _users.Add(new User
                     {
                         AccountState = accountState,
@@ -48,10 +52,11 @@ namespace ValourBankApi
 
         internal string UpdateAccountState(string guid, decimal accountState)
         {
+            WhileLock();
             if(_users.Any(x=>x.Guid.Equals(guid)))
             {
                 _users.First(x=>x.Guid.Equals(guid)).AccountState = accountState;
-                Flush();
+                changed = true;
                 return "true";
             }
 
@@ -60,6 +65,7 @@ namespace ValourBankApi
 
         internal void DestroySession(string guid)
         {
+            WhileLock();
             if (_users.Any(x => x.Guid.Equals(guid)))
             {
                 _users.First(x => x.Guid.Equals(guid)).Guid = string.Empty;
@@ -68,6 +74,7 @@ namespace ValourBankApi
 
         internal string GetAccountState(string guid)
         {
+            WhileLock();
             if (_users.Any(x => x.Guid.Equals(guid)))
             {
                 return _users.First(x => x.Guid.Equals(guid)).AccountState.ToString(CultureInfo.InvariantCulture);
@@ -77,15 +84,11 @@ namespace ValourBankApi
 
         internal string LoginCheck(string login, string password)
         {
+            WhileLock();
             if (_users.Any(
                 user => user.Username.Equals(login) && user.Password.Equals(password)
                 ))
             {
-                if (_users.Count(user => user.Username.Equals(login) && user.Password.Equals(password)) > 1)
-                {
-                    throw new Exception("More than one user has same login and password");
-                }
-
                 if (string.IsNullOrEmpty(_users.First(user =>
                     user.Username.Equals(login) && user.Password.Equals(password)).Guid))
                 {
@@ -100,21 +103,29 @@ namespace ValourBankApi
                 return "false";
                 
             }
-            else
-            {
-                return "false";
-            }
+            return "false";
         }
 
         internal void Flush()
         {
+            if (!changed) return;
+            if (Lock) return;
+
+            changed = false;
+            Lock = true;
+            Console.WriteLine("Flush started");
             List<string> db = _users
-                .Select(user => 
-                    SimpleDbHash.Encrypt($"{user.Username},{user.Password}," +
-                                         $"{user.AccountState.ToString(CultureInfo.InvariantCulture)}"))
+                .Select(user =>
+                {
+                    Debug.WriteLine($"Flushing user: {user.Username}");
+                    return SimpleDbHash.Encrypt($"{user.Username},{user.Password}," +
+                                                $"{user.AccountState.ToString(CultureInfo.InvariantCulture)}");
+                })
                 .ToList();
 
-            File.WriteAllLines(dbPath,db);
+            File.WriteAllLines(dbPath, db);
+            Lock = false;
+            Console.WriteLine("Flush finished");
         }
 
         internal void DummyUsersCreator()
@@ -126,14 +137,25 @@ namespace ValourBankApi
                 var usr = new User()
                 {
                     AccountState = new Random().Next(1, 99999),
-                    Password = "dummy" + i,
-                    Username = "dummypass" + i
+                    Username = $"dummy{i}",
+                    Password = $"dummypass{i}"
                 };
                 _users.Add(usr);
                 Thread.Sleep(5);
+
+                if(i % 50 == 0)
+                    Debug.WriteLine($"Creating users, {i} out of 1000");
             }
 
-            Flush();
+            changed = true;
+        }
+
+        internal void WhileLock()
+        {
+            while (Lock)
+            {
+                Thread.Sleep(10);
+            }
         }
     }
 }

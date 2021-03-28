@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace ValourBankApi
 {
@@ -46,13 +43,15 @@ namespace ValourBankApi
 
                 if (request.HttpMethod == "GET" && request.Url.AbsolutePath.StartsWith("/login"))
                 {
-                    
+
                     if (request.QueryString.HasKeys())
                     {
-                        var passw = request.QueryString["login"];
-                        var user = request.QueryString["pass"];
+                        var user = request.QueryString["login"];
+                        var passw = request.QueryString["pass"];
 
                         strResponse = simpleDb.LoginCheck(user, passw);
+
+                        Debug.WriteLine($"{request.Url} => {strResponse}");
                     }
                 }
 
@@ -62,6 +61,7 @@ namespace ValourBankApi
                     {
                         var guid = request.QueryString["guid"];
                         strResponse = simpleDb.GetAccountState(guid);
+                        Debug.WriteLine($"{request.Url} => {strResponse}");
                     }
                 }
 
@@ -75,16 +75,19 @@ namespace ValourBankApi
                         decimal.TryParse(state, NumberStyles.Float, CultureInfo.InvariantCulture, out var result);
 
                         strResponse = simpleDb.UpdateAccountState(guid, result);
+                        Debug.WriteLine($"{request.Url} => {strResponse}");
                     }
                 }
 
                 if (request.HttpMethod == "GET" && request.Url.AbsolutePath.StartsWith("/logout"))
                 {
-                    if(request.QueryString.HasKeys())
+                    if (request.QueryString.HasKeys())
                     {
                         var guid = request.QueryString["guid"];
 
                         simpleDb.DestroySession(guid);
+
+                        Debug.WriteLine($"{guid} => Session destroyed");
                     }
                 }
 
@@ -103,6 +106,7 @@ namespace ValourBankApi
         {
             Prepare();
             Console.WriteLine("Server started on " + Uri);
+            var timer = new Timer((x) => simpleDb.Flush(), null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
             var task = HandleConnection();
             task.GetAwaiter().GetResult();
             Listener.Close();
